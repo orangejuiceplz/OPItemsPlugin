@@ -2,6 +2,7 @@ package org.orangejuiceplz.opitemsplugin.items;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -57,47 +58,55 @@ public class AspectOfTheEnd implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (item.getType() == Material.DIAMOND_SWORD && item.getItemMeta().getDisplayName().equals("§5Aspect of the End")) {
-                Location playerLoc = player.getLocation();
-                Vector direction = playerLoc.getDirection().normalize();
+                Location start = player.getEyeLocation().clone();
+                Location end = start.clone().add(player.getEyeLocation().getDirection().multiply(8));
+                safeTeleport(player, start, end);
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
 
-                Location targetLoc = playerLoc.clone().add(direction.multiply(8));
+                float originalSpeed = player.getWalkSpeed();
+                player.setWalkSpeed(originalSpeed * 1.5f);
 
-                Location safeLoc = findSafeLocation(playerLoc, targetLoc);
-
-                if (safeLoc != null) {
-                    player.teleport(safeLoc);
-                    float originalSpeed = player.getWalkSpeed();
-                    player.setWalkSpeed(originalSpeed * 1.5f);
-                    player.sendMessage("§aYou used Instant Transmission!");
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            player.setWalkSpeed(originalSpeed);
-                            player.sendMessage("§cInstant Transmission speed boost has worn off.");
-                        }
-                    }.runTaskLater(plugin, 60L);
-                } else {
-                    player.sendMessage("§cNo safe location found for teleportation.");
-                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        player.setWalkSpeed(originalSpeed);
+                        player.sendMessage("§cInstant Transmission speed boost has worn off.");
+                    }
+                }.runTaskLater(plugin, 60L);
             }
         }
     }
 
-    private Location findSafeLocation(Location start, Location end) {
+    private void safeTeleport(Player player, Location start, Location end) {
         Vector direction = end.toVector().subtract(start.toVector()).normalize();
         double distance = start.distance(end);
+        double maxDistance = Math.min(distance, 8);
 
-        for (double d = 0; d <= distance; d += 0.5) {
+        Location lastSafeLocation = start.clone();
+
+        for (double d = 0.5; d <= maxDistance; d += 0.5) {
             Location checkLoc = start.clone().add(direction.clone().multiply(d));
-            if (checkLoc.getBlock().getType().isAir() &&
-                    checkLoc.clone().add(0, 1, 0).getBlock().getType().isAir()) {
-                Block blockBelow = checkLoc.clone().add(0, -1, 0).getBlock();
-                if (blockBelow.getType().isSolid()) {
-                    return checkLoc.clone().add(0, 0.5, 0);
-                }
+
+            if (isSafeLocation(checkLoc)) {
+                lastSafeLocation = checkLoc.clone().add(0, 0.5, 0);
+            } else if (isAirLocation(checkLoc)) {
+                lastSafeLocation = checkLoc.clone();
+            } else {
+                break;
             }
         }
-        return null;
+
+        player.teleport(lastSafeLocation);
+    }
+
+    private boolean isSafeLocation(Location location) {
+        return location.getBlock().getType().isAir() &&
+                location.clone().add(0, 1, 0).getBlock().getType().isAir() &&
+                location.clone().add(0, -1, 0).getBlock().getType().isSolid();
+    }
+
+    private boolean isAirLocation(Location location) {
+        return location.getBlock().getType().isAir() &&
+                location.clone().add(0, 1, 0).getBlock().getType().isAir();
     }
 }

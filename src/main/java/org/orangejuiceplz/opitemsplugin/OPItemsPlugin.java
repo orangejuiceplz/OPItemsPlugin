@@ -1,7 +1,7 @@
 package org.orangejuiceplz.opitemsplugin;
 
-import org.orangejuiceplz.opitemsplugin.items.*;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -9,6 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.orangejuiceplz.opitemsplugin.items.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +29,9 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
     private MaxedTerminator maxedTerminator;
     private MaxedBonzoStaff maxedBonzoStaff;
     private MaxedSpiritSceptre maxedSpiritSceptre;
+    private Hackerman hackerman;
+    private FinalDestinationArmor finalDestinationArmor;
+    private StormArmor stormArmor;
 
     @Override
     public void onEnable() {
@@ -42,6 +47,9 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         maxedTerminator = new MaxedTerminator(this);
         maxedBonzoStaff = new MaxedBonzoStaff(this);
         maxedSpiritSceptre = new MaxedSpiritSceptre(this);
+        hackerman = new Hackerman(this);
+        finalDestinationArmor = new FinalDestinationArmor(this);
+        stormArmor = new StormArmor(this);
 
         getServer().getPluginManager().registerEvents(aspectOfTheEnd, this);
         getServer().getPluginManager().registerEvents(grapplingHook, this);
@@ -53,15 +61,28 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(maxedTerminator, this);
         getServer().getPluginManager().registerEvents(maxedBonzoStaff, this);
         getServer().getPluginManager().registerEvents(maxedSpiritSceptre, this);
+        getServer().getPluginManager().registerEvents(hackerman, this);
+        getServer().getPluginManager().registerEvents(finalDestinationArmor, this);
+        getServer().getPluginManager().registerEvents(stormArmor, this);
 
         getCommand("fixSecurePerformance").setExecutor(this);
 
-        getLogger().info("OPItemsPlugin has been enabled!");
+        // Start a repeating task for Hackerman's active effect
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    hackerman.activeEffect(player);
+                }
+            }
+        }.runTaskTimer(this, 0L, 1L);
+
+        getLogger().info("Secure Performance fixes have been applied.");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("OPItemsPlugin has been disabled!");
+        getLogger().info("Secure Performance fixes has been disabled!");
     }
 
     @EventHandler
@@ -83,7 +104,16 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
                 juJuShortbow.createItem(),
                 maxedTerminator.createItem(),
                 maxedBonzoStaff.createItem(),
-                maxedSpiritSceptre.createItem()
+                maxedSpiritSceptre.createItem(),
+                hackerman.createItem(),
+                finalDestinationArmor.createArmorPiece(Material.LEATHER_HELMET, "Helmet"),
+                finalDestinationArmor.createArmorPiece(Material.LEATHER_CHESTPLATE, "Chestplate"),
+                finalDestinationArmor.createArmorPiece(Material.LEATHER_LEGGINGS, "Leggings"),
+                finalDestinationArmor.createArmorPiece(Material.LEATHER_BOOTS, "Boots"),
+                stormArmor.createArmorPiece(Material.LEATHER_HELMET, "Helmet"),
+                stormArmor.createArmorPiece(Material.LEATHER_CHESTPLATE, "Chestplate"),
+                stormArmor.createArmorPiece(Material.LEATHER_LEGGINGS, "Leggings"),
+                stormArmor.createArmorPiece(Material.LEATHER_BOOTS, "Boots")
         );
         receivedItems.add(player.getUniqueId());
         player.sendMessage("§4I trust this power to you, Administrator.");

@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class MaxedTerminator implements Listener {
     public ItemStack createItem() {
         ItemStack item = new ItemStack(Material.BOW);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§d§lerminator");
+        meta.setDisplayName("§d§lTerminator");
         List<String> lore = new ArrayList<>();
         lore.add("§7Damage: §c+380");
         lore.add("§7Strength: §c+50");
@@ -41,11 +42,11 @@ public class MaxedTerminator implements Listener {
         lore.add("§d§lMYTHIC BOW");
         meta.setLore(lore);
 
-        meta.addEnchant(Enchantment.POWER, 50, true);
-        meta.addEnchant(Enchantment.INFINITY, 10, true);
-        meta.addEnchant(Enchantment.UNBREAKING,35, true);
-        meta.addEnchant(Enchantment.MENDING, 10, true);
-        meta.addEnchant(Enchantment.FLAME, 20, true);
+        meta.addEnchant(Enchantment.POWER, 25, true);
+        meta.addEnchant(Enchantment.INFINITY, 1, true);
+        meta.addEnchant(Enchantment.UNBREAKING, 15, true);
+        meta.addEnchant(Enchantment.MENDING, 1, true);
+        meta.addEnchant(Enchantment.FLAME, 1, true);
         item.setItemMeta(meta);
         return item;
     }
@@ -60,10 +61,17 @@ public class MaxedTerminator implements Listener {
 
             event.setCancelled(true);
 
-            for (int i = 0; i < 3; i++) {
-                Arrow arrow = player.launchProjectile(Arrow.class);
-                arrow.setVelocity(player.getLocation().getDirection().multiply(4));
-            }
+            Vector playerDirection = player.getLocation().getDirection();
+            double spread = 0.2;
+
+            Arrow arrow1 = player.launchProjectile(Arrow.class);
+            arrow1.setVelocity(playerDirection.multiply(4));
+
+            Arrow arrow2 = player.launchProjectile(Arrow.class);
+            arrow2.setVelocity(playerDirection.rotateAroundY(Math.toRadians(spread)).multiply(4));
+
+            Arrow arrow3 = player.launchProjectile(Arrow.class);
+            arrow3.setVelocity(playerDirection.rotateAroundY(Math.toRadians(-spread)).multiply(4));
 
             player.playSound(player.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1.0f, 1.0f);
         }

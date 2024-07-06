@@ -1,6 +1,7 @@
 package org.orangejuiceplz.opitemsplugin.items;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -58,8 +59,8 @@ public class HeroicHyperion implements Listener {
                 "§7shield scroll ability, reducing",
                 "§7damage taken and granting an",
                 "§7absorption shield for §e5 §7seconds.",
-                "",
-                "§d§lMYTHIC SWORD"
+                ""
+
         ));
 
         meta.addEnchant(Enchantment.SHARPNESS, 35, true);
@@ -91,6 +92,8 @@ public class HeroicHyperion implements Listener {
         lore.add("§9Vampirism VI");
         lore.add("§9Venomous VI");
         lore.add("§9Vicious V");
+        lore.add("");
+        lore.add("§d§lMYTHIC SWORD");
 
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -104,31 +107,68 @@ public class HeroicHyperion implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (item.getType() == Material.IRON_SWORD && item.getItemMeta().getDisplayName().equals("§d§l§kL§r §d§lHeroic Hyperion §d§l§kL")) {
-                Location loc = player.getLocation();
-                Vector dir = loc.getDirection();
-                loc.add(dir.multiply(10));
-                player.teleport(loc);
+                Location start = player.getEyeLocation().clone();
+                Location end = start.clone().add(player.getEyeLocation().getDirection().multiply(10));
+                safeTeleport(player, start, end);
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
 
-                player.getWorld().createExplosion(loc, 0, false, false);
-
-                List<Entity> nearbyEntities = player.getNearbyEntities(5, 5, 5);
-                for (Entity entity : nearbyEntities) {
-                    if (entity instanceof LivingEntity) {
-                        ((LivingEntity) entity).damage(15000, player);
-                    }
-                }
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 4)); // 5 seconds, Absorption V
-                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2)); // 5 seconds, Resistance III
-
-                player.sendMessage("§aYou used Wither Impact!");
-
-                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    player.removePotionEffect(PotionEffectType.ABSORPTION);
-                    player.removePotionEffect(PotionEffectType.RESISTANCE);
-                    player.sendMessage("§cWither shield has worn off.");
-                }, 100L);
+                performHyperionEffect(player, player.getLocation());
             }
         }
+    }
+
+    private void safeTeleport(Player player, Location start, Location end) {
+        Vector direction = end.toVector().subtract(start.toVector()).normalize();
+        double distance = start.distance(end);
+        double maxDistance = Math.min(distance, 10);
+
+        Location lastSafeLocation = start.clone();
+
+        for (double d = 0.5; d <= maxDistance; d += 0.5) {
+            Location checkLoc = start.clone().add(direction.clone().multiply(d));
+
+            if (isSafeLocation(checkLoc)) {
+                lastSafeLocation = checkLoc.clone().add(0, 0.5, 0);
+            } else if (isAirLocation(checkLoc)) {
+                lastSafeLocation = checkLoc.clone();
+            } else {
+                break;
+            }
+        }
+
+        player.teleport(lastSafeLocation);
+    }
+
+    private boolean isSafeLocation(Location location) {
+        return location.getBlock().getType().isAir() &&
+                location.clone().add(0, 1, 0).getBlock().getType().isAir() &&
+                location.clone().add(0, -1, 0).getBlock().getType().isSolid();
+    }
+
+    private boolean isAirLocation(Location location) {
+        return location.getBlock().getType().isAir() &&
+                location.clone().add(0, 1, 0).getBlock().getType().isAir();
+    }
+
+    private void performHyperionEffect(Player player, Location location) {
+        player.getWorld().createExplosion(location, 0, false, false);
+
+        List<Entity> nearbyEntities = player.getNearbyEntities(5, 5, 5);
+        for (Entity entity : nearbyEntities) {
+            if (entity instanceof LivingEntity) {
+                ((LivingEntity) entity).damage(15000, player);
+            }
+        }
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 4)); // 5 seconds, Absorption V
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2)); // 5 seconds, Resistance III
+
+        player.sendMessage("§aYou used Wither Impact!");
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            player.removePotionEffect(PotionEffectType.ABSORPTION);
+            player.removePotionEffect(PotionEffectType.RESISTANCE);
+            player.sendMessage("§cWither shield has worn off.");
+        }, 100L);
     }
 }
