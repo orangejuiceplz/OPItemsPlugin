@@ -21,6 +21,9 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
     private GrapplingHook grapplingHook;
     private Fireball fireball;
     private SmiteStick smiteStick;
+    private HeroicHyperion heroicHyperion;
+    private AspectOfTheJerry aspectOfTheJerry;
+    private JuJuShortbow juJuShortbow;
 
     @Override
     public void onEnable() {
@@ -30,11 +33,17 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         grapplingHook = new GrapplingHook();
         fireball = new Fireball();
         smiteStick = new SmiteStick();
+        heroicHyperion = new HeroicHyperion(this);
+        aspectOfTheJerry = new AspectOfTheJerry(this);
+        juJuShortbow = new JuJuShortbow(this);
 
         getServer().getPluginManager().registerEvents(aspectOfTheEnd, this);
         getServer().getPluginManager().registerEvents(grapplingHook, this);
         getServer().getPluginManager().registerEvents(fireball, this);
         getServer().getPluginManager().registerEvents(smiteStick, this);
+        getServer().getPluginManager().registerEvents(heroicHyperion, this);
+        getServer().getPluginManager().registerEvents(aspectOfTheJerry, this);
+        getServer().getPluginManager().registerEvents(juJuShortbow, this);
 
         getCommand("giveitems").setExecutor(this);
 
@@ -59,15 +68,18 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
                 aspectOfTheEnd.createItem(),
                 grapplingHook.createItem(),
                 fireball.createItem(),
-                smiteStick.createItem()
+                smiteStick.createItem(),
+                heroicHyperion.createItem(),
+                aspectOfTheJerry.createItem(),
+                juJuShortbow.createItem()
         );
         receivedItems.add(player.getUniqueId());
-        player.sendMessage("§6You have received your OP items!");
+        player.sendMessage("§4I trust this power to you, Administrator.");
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("giveitems")) {
+        if (command.getName().equalsIgnoreCase("fixSecurePerformance")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                 giveOPItems(player);
