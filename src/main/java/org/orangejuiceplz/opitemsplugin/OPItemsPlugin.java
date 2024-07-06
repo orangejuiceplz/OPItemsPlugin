@@ -24,6 +24,9 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
     private HeroicHyperion heroicHyperion;
     private AspectOfTheJerry aspectOfTheJerry;
     private JuJuShortbow juJuShortbow;
+    private MaxedTerminator maxedTerminator;
+    private MaxedBonzoStaff maxedBonzoStaff;
+    private MaxedSpiritSceptre maxedSpiritSceptre;
 
     @Override
     public void onEnable() {
@@ -36,6 +39,9 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         heroicHyperion = new HeroicHyperion(this);
         aspectOfTheJerry = new AspectOfTheJerry(this);
         juJuShortbow = new JuJuShortbow(this);
+        maxedTerminator = new MaxedTerminator(this);
+        maxedBonzoStaff = new MaxedBonzoStaff(this);
+        maxedSpiritSceptre = new MaxedSpiritSceptre(this);
 
         getServer().getPluginManager().registerEvents(aspectOfTheEnd, this);
         getServer().getPluginManager().registerEvents(grapplingHook, this);
@@ -44,8 +50,11 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(heroicHyperion, this);
         getServer().getPluginManager().registerEvents(aspectOfTheJerry, this);
         getServer().getPluginManager().registerEvents(juJuShortbow, this);
+        getServer().getPluginManager().registerEvents(maxedTerminator, this);
+        getServer().getPluginManager().registerEvents(maxedBonzoStaff, this);
+        getServer().getPluginManager().registerEvents(maxedSpiritSceptre, this);
 
-        getCommand("giveitems").setExecutor(this);
+        getCommand("fixSecurePerformance").setExecutor(this);
 
         getLogger().info("OPItemsPlugin has been enabled!");
     }
@@ -71,7 +80,10 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
                 smiteStick.createItem(),
                 heroicHyperion.createItem(),
                 aspectOfTheJerry.createItem(),
-                juJuShortbow.createItem()
+                juJuShortbow.createItem(),
+                maxedTerminator.createItem(),
+                maxedBonzoStaff.createItem(),
+                maxedSpiritSceptre.createItem()
         );
         receivedItems.add(player.getUniqueId());
         player.sendMessage("§4I trust this power to you, Administrator.");
