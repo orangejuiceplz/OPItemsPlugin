@@ -34,7 +34,7 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
 
         aspectOfTheEnd = new AspectOfTheEnd(this);
         grapplingHook = new GrapplingHook();
-        fireball = new Fireball();
+        fireball = new Fireball(this);
         smiteStick = new SmiteStick();
         heroicHyperion = new HeroicHyperion(this);
         aspectOfTheJerry = new AspectOfTheJerry(this);

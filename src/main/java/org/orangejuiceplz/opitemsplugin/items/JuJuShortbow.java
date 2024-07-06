@@ -53,7 +53,6 @@ public class JuJuShortbow implements Listener {
         lore.add("§d§lMYTHIC BOW");
         meta.setLore(lore);
 
-        // Add enchantments
         meta.addEnchant(Enchantment.POWER, 25, true);
         meta.addEnchant(Enchantment.INFINITY, 1, true);
         meta.addEnchant(Enchantment.UNBREAKING,20, true);
@@ -76,15 +75,13 @@ public class JuJuShortbow implements Listener {
                 return;
             }
 
-            // Shoot arrow instantly
-            Arrow arrow = player.launchProjectile(Arrow.class);
-            arrow.setVelocity(player.getLocation().getDirection().multiply(3)); // Adjust speed as needed
 
-            // Play sound effect
+            Arrow arrow = player.launchProjectile(Arrow.class);
+            arrow.setVelocity(player.getLocation().getDirection().multiply(3));
+
             player.playSound(player.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1.0f, 1.0f);
 
-            // Set cooldown
-            player.setCooldown(Material.BOW, 10); // 0.5 seconds = 10 ticks
+            player.setCooldown(Material.BOW, 0);
         }
     }
 }

@@ -47,12 +47,11 @@ public class AspectOfTheJerry implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (item.getType() == Material.WOODEN_SWORD && item.getItemMeta().getDisplayName().equals("§fAspect of the Jerry")) {
-                // Play villager sound
+
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_AMBIENT, 1.0f, 1.0f);
 
                 player.sendMessage("§aJerry.");
 
-                // Set cooldown
                 player.setCooldown(Material.WOODEN_SWORD, 100); // 5 seconds = 100 ticks
             }
         }

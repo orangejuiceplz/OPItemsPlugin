@@ -62,15 +62,14 @@ public class HeroicHyperion implements Listener {
                 "§d§lMYTHIC SWORD"
         ));
 
-        // Add maxed out enchantments
         meta.addEnchant(Enchantment.SHARPNESS, 35, true);
         meta.addEnchant(Enchantment.FIRE_ASPECT, 20, true);
         meta.addEnchant(Enchantment.LOOTING, 10, true);
         meta.addEnchant(Enchantment.UNBREAKING, 50, true);
         meta.addEnchant(Enchantment.MENDING, 10, true);
+        meta.addEnchant(Enchantment.SWEEPING_EDGE,10,true);
 
-        // Add custom enchantments
-        lore.add("§9Chimera V");
+        lore.add("§dChimera V");
         lore.add("§9Cleave VI");
         lore.add("§9Critical VII");
         lore.add("§9Cubism VI");
@@ -105,16 +104,13 @@ public class HeroicHyperion implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (item.getType() == Material.IRON_SWORD && item.getItemMeta().getDisplayName().equals("§d§l§kL§r §d§lHeroic Hyperion §d§l§kL")) {
-                // Teleport player 10 blocks ahead
                 Location loc = player.getLocation();
                 Vector dir = loc.getDirection();
                 loc.add(dir.multiply(10));
                 player.teleport(loc);
 
-                // Create explosion effect (without block damage)
                 player.getWorld().createExplosion(loc, 0, false, false);
 
-                // Deal damage to nearby entities
                 List<Entity> nearbyEntities = player.getNearbyEntities(5, 5, 5);
                 for (Entity entity : nearbyEntities) {
                     if (entity instanceof LivingEntity) {
@@ -122,18 +118,16 @@ public class HeroicHyperion implements Listener {
                     }
                 }
 
-                // Apply wither shield effect
                 player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 4)); // 5 seconds, Absorption V
                 player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2)); // 5 seconds, Resistance III
 
                 player.sendMessage("§aYou used Wither Impact!");
 
-                // Schedule task to remove effects after 5 seconds
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     player.removePotionEffect(PotionEffectType.ABSORPTION);
                     player.removePotionEffect(PotionEffectType.RESISTANCE);
                     player.sendMessage("§cWither shield has worn off.");
-                }, 100L); // 100 ticks = 5 seconds
+                }, 100L);
             }
         }
     }
