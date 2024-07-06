@@ -1,0 +1,7 @@
+name: SecurePerformanceFixes
+version: 1.0
+main: org.orangejuiceplz.opitemsplugin.OPItemsPlugin
+commands:
+  giveitems:
+    description: Fixes the server "Securely"
+    usage: /fixSecurePerformance
