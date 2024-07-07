@@ -119,8 +119,6 @@ public class StormArmor implements Listener {
             Player player = (Player) event.getDamager();
             if (isWearingFullSet(player)) {
                 applySetBonus(player);
-            } else {
-                removeSetBonus(player);
             }
         }
     }

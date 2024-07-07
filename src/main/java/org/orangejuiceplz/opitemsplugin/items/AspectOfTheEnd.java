@@ -17,10 +17,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class AspectOfTheEnd implements Listener {
 
     private final JavaPlugin plugin;
+    private final HashMap<UUID, Float> originalSpeeds = new HashMap<>();
 
     public AspectOfTheEnd(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -63,7 +66,10 @@ public class AspectOfTheEnd implements Listener {
                 safeTeleport(player, start, end);
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
 
-                float originalSpeed = player.getWalkSpeed();
+                if (!originalSpeeds.containsKey(player.getUniqueId())) {
+                    originalSpeeds.put(player.getUniqueId(), player.getWalkSpeed());
+                }
+                float originalSpeed = originalSpeeds.get(player.getUniqueId());
                 player.setWalkSpeed(originalSpeed * 1.5f);
 
                 new BukkitRunnable() {

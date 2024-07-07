@@ -19,10 +19,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class FinalDestinationArmor implements Listener {
     private final JavaPlugin plugin;
+    private final HashMap<UUID, BukkitRunnable> activeEffects = new HashMap<>();
+    private final HashMap<UUID, Double> originalSpeeds = new HashMap<>();
 
     public FinalDestinationArmor(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -66,8 +69,8 @@ public class FinalDestinationArmor implements Listener {
             meta.addEnchant(Enchantment.MENDING, 10, true);
 
             if (material == Material.LEATHER_HELMET) {
-                meta.addEnchant(Enchantment.RESPIRATION, 10, true);
                 meta.addEnchant(Enchantment.AQUA_AFFINITY, 1, true);
+                meta.addEnchant(Enchantment.RESPIRATION, 10, true);
             } else if (material == Material.LEATHER_BOOTS) {
                 meta.addEnchant(Enchantment.FEATHER_FALLING, 10, true);
                 meta.addEnchant(Enchantment.DEPTH_STRIDER, 10, true);
@@ -100,31 +103,50 @@ public class FinalDestinationArmor implements Listener {
     }
 
     private void applySetBonus(Player player) {
+        if (!originalSpeeds.containsKey(player.getUniqueId())) {
+            originalSpeeds.put(player.getUniqueId(), (double) player.getWalkSpeed());
+        }
+
         player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(new AttributeModifier("strength", 30, AttributeModifier.Operation.ADD_NUMBER));
         player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).addModifier(new AttributeModifier("attack_speed", 1, AttributeModifier.Operation.ADD_NUMBER));
-        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier("speed", 0.1, AttributeModifier.Operation.ADD_SCALAR));
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(60); // 3 rows of hearts
-        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(24); // 3x netherite armor
+        player.setWalkSpeed((float) (originalSpeeds.get(player.getUniqueId()) * 1.1));
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(60);
+        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(24);
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (player.isSneaking() && isWearingFullSet(player)) {
+                    ItemStack ironIngots = new ItemStack(Material.IRON_INGOT, 2);
+                    if (player.getInventory().containsAtLeast(ironIngots, 2)) {
+                        player.getInventory().removeItem(ironIngots);
+                    } else {
+                        player.sendMessage("§cNot enough iron ingots to maintain the set bonus!");
+                        removeSetBonus(player);
+                        cancel();
+                    }
+                } else {
+                    removeSetBonus(player);
+                    cancel();
+                }
+            }
+        };
+
+        runnable.runTaskTimer(plugin, 0L, 100L); // 5 seconds
+        activeEffects.put(player.getUniqueId(), runnable);
     }
 
     private void removeSetBonus(Player player) {
-        player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getModifiers().forEach(modifier -> {
-            if (modifier.getName().equals("strength")) {
-                player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).removeModifier(modifier);
-            }
-        });
-        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getModifiers().forEach(modifier -> {
-            if (modifier.getName().equals("attack_speed")) {
-                player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).removeModifier(modifier);
-            }
-        });
-        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getModifiers().forEach(modifier -> {
-            if (modifier.getName().equals("speed")) {
-                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).removeModifier(modifier);
-            }
-        });
+        player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getModifiers().removeIf(modifier -> modifier.getName().equals("strength"));
+        player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getModifiers().removeIf(modifier -> modifier.getName().equals("attack_speed"));
+        player.setWalkSpeed(originalSpeeds.getOrDefault(player.getUniqueId(), 0.2).floatValue());
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20); // Reset to default
         player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(0); // Reset to default
+
+        BukkitRunnable runnable = activeEffects.remove(player.getUniqueId());
+        if (runnable != null) {
+            runnable.cancel();
+        }
     }
 
     @EventHandler
@@ -132,25 +154,6 @@ public class FinalDestinationArmor implements Listener {
         Player player = event.getPlayer();
         if (isWearingFullSet(player) && event.isSneaking()) {
             applySetBonus(player);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (player.isSneaking() && isWearingFullSet(player)) {
-                        ItemStack ironIngots = new ItemStack(Material.IRON_INGOT, 2);
-                        if (player.getInventory().containsAtLeast(ironIngots, 2)) {
-                            player.getInventory().removeItem(ironIngots);
-                        } else {
-                            player.sendMessage("§cNot enough iron ingots to maintain the set bonus!");
-                            removeSetBonus(player);
-                            cancel();
-                        }
-                    } else {
-                        removeSetBonus(player);
-                        cancel();
-                    }
-                }
-            }.runTaskTimer(plugin, 0L, 100L); // 5 seconds
         } else {
             removeSetBonus(player);
         }
@@ -161,7 +164,7 @@ public class FinalDestinationArmor implements Listener {
         if (event.getDamager() instanceof Player) {
             Player player = (Player) event.getDamager();
             if (isWearingFullSet(player) && player.isSneaking()) {
-                event.setDamage(event.getDamage() * 2); // 100% damage increase to Endermen
+                event.setDamage(event.getDamage() * 2);
             }
         }
     }
@@ -180,4 +183,3 @@ public class FinalDestinationArmor implements Listener {
         }
     }
 }
-
