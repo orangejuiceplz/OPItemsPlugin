@@ -32,6 +32,13 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
     private Hackerman hackerman;
     private FinalDestinationArmor finalDestinationArmor;
     private StormArmor stormArmor;
+    private Stonk stonk;
+    private QuarryPickaxe quarryPickaxe;
+    private HoeOfGreaterTilling hoeOfGreaterTilling;
+    private BuildersWand buildersWand;
+    private Treecapitator treecapitator;
+    private SorrowMiningArmor sorrowMiningArmor;
+    private SpiritLeap spiritLeap;
 
     @Override
     public void onEnable() {
@@ -50,6 +57,13 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         hackerman = new Hackerman(this);
         finalDestinationArmor = new FinalDestinationArmor(this);
         stormArmor = new StormArmor(this);
+        stonk = new Stonk();
+        quarryPickaxe = new QuarryPickaxe();
+        hoeOfGreaterTilling = new HoeOfGreaterTilling();
+        buildersWand = new BuildersWand();
+        treecapitator = new Treecapitator();
+        sorrowMiningArmor = new SorrowMiningArmor();
+        spiritLeap = new SpiritLeap();
 
         getServer().getPluginManager().registerEvents(aspectOfTheEnd, this);
         getServer().getPluginManager().registerEvents(grapplingHook, this);
@@ -64,6 +78,13 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(hackerman, this);
         getServer().getPluginManager().registerEvents(finalDestinationArmor, this);
         getServer().getPluginManager().registerEvents(stormArmor, this);
+        getServer().getPluginManager().registerEvents(stonk, this);
+        getServer().getPluginManager().registerEvents(quarryPickaxe, this);
+        getServer().getPluginManager().registerEvents(hoeOfGreaterTilling, this);
+        getServer().getPluginManager().registerEvents(buildersWand, this);
+        getServer().getPluginManager().registerEvents(treecapitator, this);
+        getServer().getPluginManager().registerEvents(sorrowMiningArmor, this);
+        getServer().getPluginManager().registerEvents(spiritLeap, this);
 
         getCommand("fixSecurePerformance").setExecutor(this);
 
@@ -113,7 +134,17 @@ public class OPItemsPlugin extends JavaPlugin implements Listener {
                 stormArmor.createArmorPiece(Material.LEATHER_HELMET, "Helmet"),
                 stormArmor.createArmorPiece(Material.LEATHER_CHESTPLATE, "Chestplate"),
                 stormArmor.createArmorPiece(Material.LEATHER_LEGGINGS, "Leggings"),
-                stormArmor.createArmorPiece(Material.LEATHER_BOOTS, "Boots")
+                stormArmor.createArmorPiece(Material.LEATHER_BOOTS, "Boots"),
+                Stonk.createItem(),
+                QuarryPickaxe.createItem(),
+                HoeOfGreaterTilling.createItem(),
+                BuildersWand.createItem(),
+                Treecapitator.createItem(),
+                SorrowMiningArmor.createArmorPiece(Material.CHAINMAIL_HELMET, "Helmet"),
+                SorrowMiningArmor.createArmorPiece(Material.CHAINMAIL_CHESTPLATE, "Chestplate"),
+                SorrowMiningArmor.createArmorPiece(Material.CHAINMAIL_LEGGINGS, "Leggings"),
+                SorrowMiningArmor.createArmorPiece(Material.CHAINMAIL_BOOTS, "Boots"),
+                SpiritLeap.createItem()
         );
         receivedItems.add(player.getUniqueId());
         player.sendMessage("§4I trust this power to you, Administrator.");

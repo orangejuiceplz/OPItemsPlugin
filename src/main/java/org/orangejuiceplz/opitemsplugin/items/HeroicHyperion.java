@@ -17,14 +17,18 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class HeroicHyperion implements Listener {
 
     private final JavaPlugin plugin;
+    private final HashMap<UUID, Integer> usageCounter = new HashMap<>();
 
     public HeroicHyperion(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -60,7 +64,6 @@ public class HeroicHyperion implements Listener {
                 "§7damage taken and granting an",
                 "§7absorption shield for §e5 §7seconds.",
                 ""
-
         ));
 
         meta.addEnchant(Enchantment.SHARPNESS, 35, true);
@@ -68,7 +71,7 @@ public class HeroicHyperion implements Listener {
         meta.addEnchant(Enchantment.LOOTING, 10, true);
         meta.addEnchant(Enchantment.UNBREAKING, 50, true);
         meta.addEnchant(Enchantment.MENDING, 10, true);
-        meta.addEnchant(Enchantment.SWEEPING_EDGE,10,true);
+        meta.addEnchant(Enchantment.SWEEPING_EDGE, 10, true);
 
         lore.add("§dChimera V");
         lore.add("§9Cleave VI");
@@ -160,15 +163,32 @@ public class HeroicHyperion implements Listener {
             }
         }
 
+        UUID playerId = player.getUniqueId();
+        int currentUsage = usageCounter.getOrDefault(playerId, 0) + 1;
+        usageCounter.put(playerId, currentUsage);
+
         player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, 4)); // 5 seconds, Absorption V
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2)); // 5 seconds, Resistance III
 
-        player.sendMessage("§aYou used Wither Impact!");
+        if (currentUsage == 1) {
+            player.sendMessage("§aYou used Wither Impact!");
+        } else {
+            player.sendMessage("§aYou used Wither Impact!");
+        }
 
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.removePotionEffect(PotionEffectType.ABSORPTION);
-            player.removePotionEffect(PotionEffectType.RESISTANCE);
-            player.sendMessage("§cWither shield has worn off.");
-        }, 100L);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                int updatedUsage = usageCounter.get(playerId) - 1;
+                if (updatedUsage == 0) {
+                    player.removePotionEffect(PotionEffectType.ABSORPTION);
+                    player.removePotionEffect(PotionEffectType.RESISTANCE);
+                    player.sendMessage("§cWither shield has worn off.");
+                    usageCounter.remove(playerId);
+                } else {
+                    usageCounter.put(playerId, updatedUsage);
+                }
+            }
+        }.runTaskLater(plugin, 100L);
     }
 }

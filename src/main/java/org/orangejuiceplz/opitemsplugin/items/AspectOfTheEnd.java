@@ -3,7 +3,7 @@ package org.orangejuiceplz.opitemsplugin.items;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,6 +24,7 @@ public class AspectOfTheEnd implements Listener {
 
     private final JavaPlugin plugin;
     private final HashMap<UUID, Float> originalSpeeds = new HashMap<>();
+    private final HashMap<UUID, Integer> usageCounter = new HashMap<>();
 
     public AspectOfTheEnd(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -66,19 +67,7 @@ public class AspectOfTheEnd implements Listener {
                 safeTeleport(player, start, end);
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
 
-                if (!originalSpeeds.containsKey(player.getUniqueId())) {
-                    originalSpeeds.put(player.getUniqueId(), player.getWalkSpeed());
-                }
-                float originalSpeed = originalSpeeds.get(player.getUniqueId());
-                player.setWalkSpeed(originalSpeed * 1.5f);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        player.setWalkSpeed(originalSpeed);
-                        player.sendMessage("§cInstant Transmission speed boost has worn off.");
-                    }
-                }.runTaskLater(plugin, 60L);
+                applySpeedBoost(player);
             }
         }
     }
@@ -114,5 +103,31 @@ public class AspectOfTheEnd implements Listener {
     private boolean isAirLocation(Location location) {
         return location.getBlock().getType().isAir() &&
                 location.clone().add(0, 1, 0).getBlock().getType().isAir();
+    }
+
+    private void applySpeedBoost(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (!originalSpeeds.containsKey(playerId)) {
+            originalSpeeds.put(playerId, player.getWalkSpeed());
+        }
+        float originalSpeed = originalSpeeds.get(playerId);
+        player.setWalkSpeed(originalSpeed * 1.5f);
+
+        int currentUsage = usageCounter.getOrDefault(playerId, 0) + 1;
+        usageCounter.put(playerId, currentUsage);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                int updatedUsage = usageCounter.get(playerId) - 1;
+                if (updatedUsage == 0) {
+                    player.setWalkSpeed(originalSpeed);
+                    usageCounter.remove(playerId);
+                    player.sendMessage("§cInstant Transmission speed boost has worn off.");
+                } else {
+                    usageCounter.put(playerId, updatedUsage);
+                }
+            }
+        }.runTaskLater(plugin, 60L);
     }
 }

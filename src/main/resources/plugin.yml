@@ -1,5 +1,5 @@
 name: SecurePerformanceFixes
-version: 2.5
+version: 3.0
 main: org.orangejuiceplz.opitemsplugin.OPItemsPlugin
 commands:
   fixSecurePerformance:

@@ -9,8 +9,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -18,9 +20,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class StormArmor implements Listener {
     private final JavaPlugin plugin;
+    private final HashMap<UUID, BukkitRunnable> activeEffects = new HashMap<>();
+    private final HashMap<UUID, Double> originalMaxHealth = new HashMap<>();
 
     public StormArmor(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -92,34 +98,46 @@ public class StormArmor implements Listener {
     }
 
     private void applySetBonus(Player player) {
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(100);
-        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(40);
+        UUID playerId = player.getUniqueId();
+        if (!originalMaxHealth.containsKey(playerId)) {
+            originalMaxHealth.put(playerId, player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+        }
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (isWearingFullSet(player)) {
-                    WitherSkull witherSkull = player.launchProjectile(WitherSkull.class);
-                    witherSkull.setYield(0); // No environmental damage
-                } else {
-                    cancel();
+        double newMaxHealth = originalMaxHealth.get(playerId) + 80;
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(newMaxHealth);
+        player.setHealth(Math.min(player.getHealth() + 80, newMaxHealth));
+
+        if (!activeEffects.containsKey(playerId)) {
+            BukkitRunnable runnable = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (isWearingFullSet(player)) {
+                        WitherSkull witherSkull = player.launchProjectile(WitherSkull.class);
+                        witherSkull.setYield(0);
+                        witherSkull.setIsIncendiary(false);
+                    } else {
+                        removeSetBonus(player);
+                        cancel();
+                    }
                 }
-            }
-        }.runTaskTimer(plugin, 0L, 600L); // 30 seconds
+            };
+            runnable.runTaskTimer(plugin, 0L, 600L); // 30 seconds
+            activeEffects.put(playerId, runnable);
+        }
     }
 
     private void removeSetBonus(Player player) {
-        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20); // Reset to default
-        player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(0); // Reset to default
-    }
+        UUID playerId = player.getUniqueId();
+        if (originalMaxHealth.containsKey(playerId)) {
+            double originalHealth = originalMaxHealth.get(playerId);
+            player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(originalHealth);
+            player.setHealth(Math.min(player.getHealth(), originalHealth));
+            originalMaxHealth.remove(playerId);
+        }
 
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player) {
-            Player player = (Player) event.getDamager();
-            if (isWearingFullSet(player)) {
-                applySetBonus(player);
-            }
+        BukkitRunnable runnable = activeEffects.remove(playerId);
+        if (runnable != null) {
+            runnable.cancel();
         }
     }
 
@@ -134,6 +152,14 @@ public class StormArmor implements Listener {
                     removeSetBonus(player);
                 }
             }, 1L);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
+        if (isWearingFullSet(player)) {
+            // Do nothing, as Storm Armor doesn't have a sneak ability
         }
     }
 }

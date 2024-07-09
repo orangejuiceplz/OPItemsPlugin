@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -77,6 +78,7 @@ public class Fireball implements Listener {
         org.bukkit.entity.Fireball fireball = player.launchProjectile(org.bukkit.entity.Fireball.class);
         fireball.setYield(5.0F); // Increased yield for more damage
         fireball.setIsIncendiary(true);
+        fireball.setVelocity(player.getLocation().getDirection().multiply(3)); // Increased speed
 
         boolean envDamage = item.getItemMeta().getPersistentDataContainer().getOrDefault(envDamageKey, PersistentDataType.BOOLEAN, false);
         if (!envDamage) {
@@ -93,5 +95,15 @@ public class Fireball implements Listener {
         meta.getPersistentDataContainer().set(envDamageKey, PersistentDataType.BOOLEAN, newState);
         updateLore(meta, newState);
         item.setItemMeta(meta);
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        if (event.getEntity() instanceof org.bukkit.entity.Fireball) {
+            org.bukkit.entity.Fireball fireball = (org.bukkit.entity.Fireball) event.getEntity();
+            if (fireball.hasMetadata("no_environmental_damage")) {
+                event.blockList().clear();
+            }
+        }
     }
 }
