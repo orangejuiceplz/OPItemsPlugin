@@ -37,7 +37,7 @@ public class MaxedBonzoStaff implements Listener {
         lore.add("§7damage to nearby enemies.");
         lore.add("§8Mana Cost: §390");
         lore.add("");
-        lore.add("§1§RARE DUNGEON STAFF");
+        lore.add("§1§lRARE DUNGEON STAFF");
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

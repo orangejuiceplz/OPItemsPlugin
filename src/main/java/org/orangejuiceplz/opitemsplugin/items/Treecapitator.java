@@ -28,9 +28,9 @@ public class Treecapitator implements Listener {
         meta.setDisplayName("§5Treecapitator");
         meta.setLore(Arrays.asList(
                 "§7A forceful golden axe which can",
-                "break a large amount of logs in",
-                "a single hit!",
-                "§8Cooldown: ",
+                "§7break a large amount of logs in",
+                "§7a single hit!",
+                "§8Cooldown: §a2s ",
                 "",
                 "§5§lEPIC AXE"
         ));

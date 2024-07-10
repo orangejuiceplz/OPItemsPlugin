@@ -18,16 +18,19 @@ public class Stonk implements Listener {
     public static ItemStack createItem() {
         ItemStack item = new ItemStack(Material.GOLDEN_PICKAXE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§6Stonk");
+        meta.setDisplayName("§5Stonk");
         meta.setLore(Arrays.asList(
-                "§7Efficiency VI",
-                "§7Unbreakable",
+                "§8Breaking Power 1",
                 "",
-                "§6Ability: End Stone Bonus",
-                "§75% chance to drop an extra",
-                "§7End Stone when mining End Stone.",
+                "§7Mining Speed: §a+380",
                 "",
-                "§6§lLEGENDARY PICKAXE"
+                "§7When mining End Stone with this",
+                "§7pickaxe, Endermites won't spawn,",
+                "§7experience will be dropped!",
+                "§a5% §7chance to drop extra End",
+                "Stone block.",
+                "",
+                "§5§lEPIC PICKAXE"
         ));
         meta.addEnchant(Enchantment.EFFICIENCY, 6, true);
         meta.setUnbreakable(true);

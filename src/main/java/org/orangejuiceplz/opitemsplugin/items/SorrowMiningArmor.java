@@ -23,7 +23,7 @@ public class SorrowMiningArmor implements Listener {
     public static ItemStack createArmorPiece(Material material, String piece) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§7Sorrow " + piece);
+        meta.setDisplayName("§6Sorrow " + piece);
         meta.setLore(Arrays.asList(
                 "§7Mining Speed: §a+100",
                 "§7Mining Fortune: §a+10",
@@ -32,7 +32,7 @@ public class SorrowMiningArmor implements Listener {
                 "§7Grants §a+20% §7chance to find",
                 "§7rare drops while mining.",
                 "",
-                "§7§lEPIC ARMOR PIECE"
+                "§6§lLEGENDARY ARMOR PIECE"
         ));
 
         meta.addEnchant(Enchantment.PROTECTION, 10, true);

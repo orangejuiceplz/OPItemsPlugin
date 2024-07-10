@@ -22,8 +22,8 @@ public class QuarryPickaxe implements Listener {
                 "§7Mines a 3x3x3 area at once.",
                 "",
                 "§6Ability: Quarry §e§lWHILE MINING",
-                "§7Automatically mines a 3x3x1 area",
-                "§7in the direction you're facing.",
+                "§7Automatically mines a 3x3x3 area",
+                "§7centered on the block you're mining.",
                 "",
                 "§6§lLEGENDARY PICKAXE"
         ));
@@ -38,7 +38,7 @@ public class QuarryPickaxe implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if (item.getItemMeta() != null && item.getItemMeta().getDisplayName().equals("§bQuarry Pickaxe")) {
+        if (item.getItemMeta() != null && item.getItemMeta().getDisplayName().equals("§6Quarry Pickaxe")) {
             Block centerBlock = event.getBlock();
             mineArea(player, centerBlock);
             event.setCancelled(true);
@@ -48,9 +48,11 @@ public class QuarryPickaxe implements Listener {
     private void mineArea(Player player, Block centerBlock) {
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
-                Block relativeBlock = centerBlock.getRelative(x, y, 0);
-                if (relativeBlock.getType().isBlock() && !relativeBlock.getType().isAir()) {
-                    relativeBlock.breakNaturally(player.getInventory().getItemInMainHand());
+                for (int z = -1; z <= 1; z++) {
+                    Block relativeBlock = centerBlock.getRelative(x, y, z);
+                    if (relativeBlock.getType().isBlock() && !relativeBlock.getType().isAir()) {
+                        relativeBlock.breakNaturally(player.getInventory().getItemInMainHand());
+                    }
                 }
             }
         }

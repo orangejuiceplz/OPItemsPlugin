@@ -20,15 +20,15 @@ public class SpiritLeap implements Listener {
     public static ItemStack createItem() {
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§1Spirit Leap");
+        meta.setDisplayName("§9Spirit Leap");
         meta.setLore(Arrays.asList(
                 "§6Ability: Spirit Teleport §e§lRIGHT CLICK",
                 "§7Allows you to teleport to any",
                 "§7person when below a certain",
-                "§7 threshold!",
+                "§7threshold!",
                 "§8Cooldown: §a5s",
                 "",
-                "§b§lRARE ITEM"
+                "§9§lRARE ITEM"
         ));
         item.setItemMeta(meta);
         return item;
